@@ -37,8 +37,9 @@ kalpButonu.addEventListener('click', () => {
     kalp.innerHTML = '💖';
     kalp.style.fontSize = '3em';
     kalp.style.position = 'absolute';
-    kalp.style.top = (kalpButonu.offsetTop - 50) + 'px';
-    kalp.style.left = kalpButonu.offsetLeft + (kalpButonu.offsetWidth / 2) + 'px';
+    const rect = kalpButonu.getBoundingClientRect();
+    kalp.style.top = (rect.top + window.scrollY - 50) + 'px'; // Sayfa kaydırma ile düzeltildi
+    kalp.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px'; // Sayfa kaydırma ile düzeltildi
     kalp.style.transform = 'translateX(-50%)'; 
     
     document.body.appendChild(kalp);
@@ -51,7 +52,6 @@ kalpButonu.addEventListener('click', () => {
 // Sayfa yüklendiğinde animasyonu başlat
 window.onload = function() {
     yaziyiYaz();
-    // NOT: Arama kodu kendi onload olayını kullanmayacak, doğrudan çalışacak.
 };
 
 // =========================================================================
@@ -67,7 +67,13 @@ const peerIdDisplay = document.getElementById('peerId');
 const remotePeerIdInput = document.getElementById('remotePeerId');
 const statusDisplay = document.getElementById('status'); 
 
-const peer = new Peer();
+// **BURASI YENİ: RENDER SUNUCUSUNU KULLANACAK ŞEKİLDE DÜZELTİLDİ**
+const peer = new Peer({
+    host: 'RENDER-SUNUCU-ADRESİN.onrender.com', // <-- BURAYI ALDIĞIN RENDER ADRESİYLE DEĞİŞTİR!
+    port: 443, 
+    path: '/',
+    secure: true
+});
 let localStream;
 let currentCall = null; 
 
@@ -84,17 +90,21 @@ peer.on('error', (err) => {
 });
 
 // 2. Mikrofon Erişimi
-navigator.mediaDevices.getUserMedia({ video: false, audio: true })
-    .then(stream => {
-        localStream = stream;
-        localAudio.srcObject = stream;
-        statusDisplay.textContent = 'Mikrofon Hazır.';
-    })
-    .catch(err => {
-        console.error("Mikrofon erişimi başarısız oldu:", err);
-        statusDisplay.textContent = 'Arama için MİKROFON İZNİ vermeniz gerekiyor!';
-        callButton.disabled = true; 
-    });
+if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    statusDisplay.textContent = 'Tarayıcı desteklenmiyor!';
+} else {
+    navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+        .then(stream => {
+            localStream = stream;
+            localAudio.srcObject = stream;
+            statusDisplay.textContent = 'Mikrofon Hazır.';
+        })
+        .catch(err => {
+            console.error("Mikrofon erişimi başarısız oldu:", err);
+            statusDisplay.textContent = 'Arama için MİKROFON İZNİ vermeniz gerekiyor!';
+            callButton.disabled = true; 
+        });
+}
 
 
 // 3. Arama Başlatma (Siz, Naz'ı aradığınızda)
