@@ -6,6 +6,7 @@ body {
     margin: 0;
     padding: 0;
     text-align: center;
+    overflow-x: hidden; /* Uçan kalpler için kaydırmayı engelle */
 }
 
 /* Navigasyon (Üst menü) */
@@ -34,6 +35,7 @@ nav a:hover {
     animation: fadeIn 2s ease-out; /* Animasyon ekleyin */
 }
 
+
 /* Kalp Butonu */
 #kalp-butonu {
     background-color: #ff4081; /* Kırmızımsı pembe */
@@ -56,4 +58,25 @@ nav a:hover {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Uçan Kalp Animasyonu (Korundu) */
+.floating-heart {
+    position: absolute;
+    font-size: 1.5em;
+    opacity: 0.8;
+    z-index: 100;
+    pointer-events: none; /* Etkileşimi engelle */
+    animation: floatUp 5s ease-out forwards;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-500px) scale(1.5); /* Yukarı doğru uçar ve büyür */
+        opacity: 0; /* Yukarıda kaybolur */
+    }
 }
