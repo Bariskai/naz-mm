@@ -80,3 +80,64 @@ nav a:hover {
         opacity: 0; /* Yukarıda kaybolur */
     }
 }
+/* =========================================================================
+   YENİ: ARAMA MODÜLÜ STİLLERİ
+   ========================================================================= */
+
+.arama-modulu-container {
+    /* Genel ayarlara uyması için */
+    margin-top: 50px;
+    padding: 20px;
+    background-color: #ffe0f6; /* Hafif arka plan rengi */
+    border-radius: 10px;
+    display: inline-block; /* İçeriği sarmalaması için */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.arama-modulu-container h2 {
+    color: #880e4f;
+    margin-bottom: 20px;
+}
+
+/* ID kutucukları ve Durum Yazıları */
+.arama-modulu-container input[type="text"] {
+    padding: 10px;
+    margin: 5px;
+    border: 2px solid #ff80ab; /* Pembe çerçeve */
+    border-radius: 5px;
+    font-size: 1em;
+    text-align: center;
+}
+
+#status {
+    font-weight: bold;
+    color: #00796b; /* Bağlantı durumu için yeşilimsi renk */
+    display: block;
+    margin-bottom: 15px;
+}
+
+/* Arama Butonları */
+.arama-modulu-container button {
+    /* Genel kalp butonu stili yerine yeni stil */
+    background-color: #ff4081; /* Kırmızımsı pembe */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.arama-modulu-container button:hover {
+    background-color: #f50057;
+    transform: translateY(-1px);
+}
+
+/* Devre Dışı Bırakılmış Buton (Aramayı Bitir) */
+.arama-modulu-container button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
