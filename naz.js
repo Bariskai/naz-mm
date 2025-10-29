@@ -37,9 +37,10 @@ kalpButonu.addEventListener('click', () => {
     kalp.innerHTML = '💖';
     kalp.style.fontSize = '3em';
     kalp.style.position = 'absolute';
+    // Kalp pozisyonunu dinamik olarak ayarlamak daha iyi
     const rect = kalpButonu.getBoundingClientRect();
-    kalp.style.top = (rect.top + window.scrollY - 50) + 'px'; // Sayfa kaydırma ile düzeltildi
-    kalp.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px'; // Sayfa kaydırma ile düzeltildi
+    kalp.style.top = (rect.top + window.scrollY - 50) + 'px';
+    kalp.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
     kalp.style.transform = 'translateX(-50%)'; 
     
     document.body.appendChild(kalp);
@@ -52,6 +53,7 @@ kalpButonu.addEventListener('click', () => {
 // Sayfa yüklendiğinde animasyonu başlat
 window.onload = function() {
     yaziyiYaz();
+    // NOT: Arama kodu kendi onload olayını kullanmayacak, doğrudan çalışacak.
 };
 
 // =========================================================================
@@ -67,17 +69,24 @@ const peerIdDisplay = document.getElementById('peerId');
 const remotePeerIdInput = document.getElementById('remotePeerId');
 const statusDisplay = document.getElementById('status'); 
 
-// **BURASI YENİ: RENDER SUNUCUSUNU KULLANACAK ŞEKİLDE DÜZELTİLDİ**
+// Tarayıcı Desteği Kontrolü
+if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    statusDisplay.textContent = 'Tarayıcı desteklenmiyor!';
+    alert('Sesli arama için güncel bir tarayıcı (Chrome, Firefox, Safari) kullanın.');
+}
+
+// 1. PeerJS Bağlantısını Kurma (Sunucu Denemeleri ve Güvenilir Ayarlar)
 const peer = new Peer({
-    host: 'RENDER-SUNUCU-ADRESİN.onrender.com', // <-- BURAYI ALDIĞIN RENDER ADRESİYLE DEĞİŞTİR!
+    host: '0.peerjs.com', 
     port: 443, 
     path: '/',
-    secure: true
+    secure: true,
+    // Sunucudan yanıt gelmezse yeniden denemesi için ek ayarlar
+    config: { 'iceServers': [ { 'urls': 'stun:stun.l.google.com:19302' } ] } 
 });
 let localStream;
 let currentCall = null; 
 
-// 1. PeerJS Bağlantısını Kurma
 peer.on('open', (id) => {
     peerIdDisplay.value = id;
     statusDisplay.textContent = 'Hazır. Sizin ID: ' + id;
@@ -85,26 +94,22 @@ peer.on('open', (id) => {
 
 peer.on('error', (err) => {
     console.error("PeerJS Hatası:", err);
-    statusDisplay.textContent = 'Hata oluştu. Yenilemeyi deneyin.';
+    statusDisplay.textContent = 'HATA: Bağlantı kurulamadı. Sayfayı yenileyin.';
     callButton.disabled = true; // Hata varsa aramayı engelle
 });
 
 // 2. Mikrofon Erişimi
-if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    statusDisplay.textContent = 'Tarayıcı desteklenmiyor!';
-} else {
-    navigator.mediaDevices.getUserMedia({ video: false, audio: true })
-        .then(stream => {
-            localStream = stream;
-            localAudio.srcObject = stream;
-            statusDisplay.textContent = 'Mikrofon Hazır.';
-        })
-        .catch(err => {
-            console.error("Mikrofon erişimi başarısız oldu:", err);
-            statusDisplay.textContent = 'Arama için MİKROFON İZNİ vermeniz gerekiyor!';
-            callButton.disabled = true; 
-        });
-}
+navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+    .then(stream => {
+        localStream = stream;
+        localAudio.srcObject = stream;
+        statusDisplay.textContent = 'Mikrofon Hazır.';
+    })
+    .catch(err => {
+        console.error("Mikrofon erişimi başarısız oldu:", err);
+        statusDisplay.textContent = 'Arama için MİKROFON İZNİ vermeniz gerekiyor!';
+        callButton.disabled = true; 
+    });
 
 
 // 3. Arama Başlatma (Siz, Naz'ı aradığınızda)
@@ -137,7 +142,8 @@ callButton.addEventListener('click', () => {
 
 // 4. Aramayı Cevaplama (Naz, Sizi aradığında)
 peer.on('call', (call) => {
-    const onay = confirm("Naz sizi arıyor. Cevaplamak ister misiniz?");
+    // Sayfada çıkan confirm yerine daha zarif bir şey kullanmalısınız.
+    const onay = confirm("Naz sizi arıyor. Cevaplamak ister misiniz?"); 
     if (onay) {
         currentCall = call;
         call.answer(localStream);
@@ -180,3 +186,4 @@ function endCall() {
 }
 
 endCallButton.addEventListener('click', endCall);
+
