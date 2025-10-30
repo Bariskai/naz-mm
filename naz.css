@@ -140,3 +140,22 @@ nav a:hover {
     background-color: #cccccc;
     cursor: not-allowed;
 }
+
+/* =========================================================================
+   YENİ: ARAMA SÜRESİ (SAYAÇ)
+   ========================================================================= */
+#callTimerContainer {
+    font-size: 1.1em;
+    color: #4a148c; /* Ana metin rengiyle aynı */
+    margin-top: 10px;
+}
+
+#callTimer {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #d81b60; /* Vurgulu bir pembe */
+    background-color: #ffffff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
