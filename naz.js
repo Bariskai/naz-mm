@@ -69,6 +69,13 @@ const peerIdDisplay = document.getElementById('peerId');
 const remotePeerIdInput = document.getElementById('remotePeerId');
 const statusDisplay = document.getElementById('status'); 
 
+// YENİ: Sayaç Öğeleri
+const callTimerContainer = document.getElementById('callTimerContainer');
+const callTimerDisplay = document.getElementById('callTimer');
+let callTimerInterval = null; // Sayacın setInterval kimliğini tutar
+let callStartTime = 0; // Aramanın başladığı zamanı (timestamp) tutar
+
+
 // Tarayıcı Desteği Kontrolü
 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     statusDisplay.textContent = 'Tarayıcı desteklenmiyor!';
@@ -97,6 +104,43 @@ peer.on('error', (err) => {
     statusDisplay.textContent = 'HATA: Bağlantı kurulamadı. Sayfayı yenileyin.';
     callButton.disabled = true; // Hata varsa aramayı engelle
 });
+
+// =========================================================================
+// YENİ: ARAMA SAYACI FONKSİYONLARI
+// =========================================================================
+
+function startCallTimer() {
+    // Zaten çalışan bir sayaç varsa temizle
+    if (callTimerInterval) {
+        clearInterval(callTimerInterval);
+    }
+    
+    callTimerContainer.style.display = 'block'; // Sayacı görünür yap
+    callStartTime = Date.now(); // Başlangıç zamanını kaydet
+
+    callTimerInterval = setInterval(() => {
+        const elapsed = Date.now() - callStartTime;
+        const totalSeconds = Math.floor(elapsed / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        
+        // MM:SS formatı için '0' ile doldurma
+        const formattedMinutes = String(minutes).padStart(2, '0');
+        const formattedSeconds = String(seconds).padStart(2, '0');
+        
+        callTimerDisplay.textContent = `${formattedMinutes}:${formattedSeconds}`;
+    }, 1000); // Her saniye güncelle
+}
+
+function stopCallTimer() {
+    if (callTimerInterval) {
+        clearInterval(callTimerInterval);
+        callTimerInterval = null;
+    }
+    callTimerContainer.style.display = 'none'; // Sayacı gizle
+    callTimerDisplay.textContent = '00:00'; // Sayacı sıfırla
+}
+
 
 // 2. Mikrofon Erişimi
 navigator.mediaDevices.getUserMedia({ video: false, audio: true })
@@ -128,6 +172,7 @@ callButton.addEventListener('click', () => {
     call.on('stream', (remoteStream) => {
         remoteAudio.srcObject = remoteStream;
         statusDisplay.textContent = 'Arama Bağlandı.';
+        startCallTimer(); // SAYAÇ BAŞLAT
     });
 
     call.on('close', () => {
@@ -151,6 +196,7 @@ peer.on('call', (call) => {
 
         call.on('stream', (remoteStream) => {
             remoteAudio.srcObject = remoteStream;
+            startCallTimer(); // SAYAÇ BAŞLAT
         });
         
         call.on('close', () => {
@@ -168,6 +214,8 @@ peer.on('call', (call) => {
 
 // 5. Aramayı Sonlandırma Fonksiyonu
 function endCall() {
+    stopCallTimer(); // SAYAÇ DURDUR
+
     if (currentCall) {
         currentCall.close();
         currentCall = null;
@@ -186,4 +234,3 @@ function endCall() {
 }
 
 endCallButton.addEventListener('click', endCall);
-
